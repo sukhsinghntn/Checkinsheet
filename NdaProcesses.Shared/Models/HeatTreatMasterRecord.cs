@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using NDAProcesses.Shared.Serialization;
 
 namespace NDAProcesses.Shared.Models;
 
@@ -71,6 +72,7 @@ public class HeatTreatMasterRecord
     public string? ClipGrooveMeasureLocation { get; set; }
 
     [JsonPropertyName("xValue")]
+    [JsonConverter(typeof(FlexibleNullableDoubleConverter))]
     public double? XValue { get; set; }
 
     [JsonPropertyName("vValue")]
