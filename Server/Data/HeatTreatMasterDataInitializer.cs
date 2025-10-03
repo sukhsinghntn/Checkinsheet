@@ -47,6 +47,7 @@ public class HeatTreatMasterDataInitializer
             PropertyNameCaseInsensitive = true
         };
         serializerOptions.Converters.Add(new FlexibleStringJsonConverter());
+        serializerOptions.Converters.Add(new FlexibleNullableDoubleConverter());
 
         var seedRecords = await JsonSerializer.DeserializeAsync<List<HeatTreatMasterRecord>>(stream, serializerOptions, cancellationToken) ?? [];
 
