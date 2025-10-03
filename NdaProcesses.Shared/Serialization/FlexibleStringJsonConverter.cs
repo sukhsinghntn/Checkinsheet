@@ -1,3 +1,5 @@
+using System.Buffers;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,10 +13,20 @@ public sealed class FlexibleStringJsonConverter : JsonConverter<string?>
         {
             JsonTokenType.Null => null,
             JsonTokenType.String => reader.GetString(),
-            JsonTokenType.Number => reader.GetRawText(),
+            JsonTokenType.Number => ReadNumberAsString(ref reader),
             JsonTokenType.True or JsonTokenType.False => reader.GetBoolean().ToString(),
             _ => throw new JsonException($"Unexpected token {reader.TokenType} when parsing a string value.")
         };
+    }
+
+    private static string ReadNumberAsString(ref Utf8JsonReader reader)
+    {
+        if (reader.HasValueSequence)
+        {
+            return Encoding.UTF8.GetString(reader.ValueSequence.ToArray());
+        }
+
+        return Encoding.UTF8.GetString(reader.ValueSpan);
     }
 
     public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
