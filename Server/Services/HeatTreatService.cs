@@ -1,19 +1,19 @@
-using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using NDAProcesses.Shared.Models;
 using NDAProcesses.Shared.Services;
+using NDAProcesses.Server.Data;
 
 namespace NDAProcesses.Server.Services;
 
 public class HeatTreatService : IHeatTreatService
 {
-    private readonly IWebHostEnvironment _environment;
+    private readonly IDbContextFactory<HeatTreatDbContext> _dbContextFactory;
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
     private IReadOnlyDictionary<string, HeatTreatMasterRecord>? _cache;
 
-    public HeatTreatService(IWebHostEnvironment environment)
+    public HeatTreatService(IDbContextFactory<HeatTreatDbContext> dbContextFactory)
     {
-        _environment = environment;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<IReadOnlyList<HeatTreatMasterRecord>> GetMasterRecordsAsync(CancellationToken cancellationToken = default)
@@ -51,14 +51,20 @@ public class HeatTreatService : IHeatTreatService
                 return _cache;
             }
 
-            var dataPath = Path.Combine(_environment.ContentRootPath, "Data", "heat-treat-master-data.json");
-            await using var stream = File.OpenRead(dataPath);
-            var records = await JsonSerializer.DeserializeAsync<List<HeatTreatMasterRecord>>(stream, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            }, cancellationToken) ?? [];
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+            var records = await dbContext.HeatTreatMasterRecords
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
-            _cache = records.ToDictionary(record => record.PartNumber, StringComparer.OrdinalIgnoreCase);
+            _cache = records
+                .Where(record => !string.IsNullOrWhiteSpace(record.PartNumber))
+                .Select(record =>
+                {
+                    record.PartNumber = record.PartNumber.Trim();
+                    return record;
+                })
+                .GroupBy(record => record.PartNumber, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
             return _cache;
         }
         finally

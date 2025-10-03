@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace NDAProcesses.Shared.Models;
 
 public class HeatTreatMasterRecord
 {
+    [Key]
+    [StringLength(128)]
     [JsonPropertyName("partNumber")]
     public string PartNumber { get; set; } = string.Empty;
 

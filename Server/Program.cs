@@ -2,10 +2,13 @@ using Radzen;
 using NDAProcesses.Server.Components;
 using NDAProcesses.Client.Services;
 using NDAProcesses.Shared.Services;
+using NDAProcesses.Server.Data;
 using NDAProcesses.Server.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("Default");
 
 // Add services for Blazor components, CORS, and DB contexts
 builder.Services.AddRazorComponents()
@@ -24,6 +27,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddDbContext<HeatTreatDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddDbContextFactory<HeatTreatDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<HeatTreatMasterDataInitializer>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<CookieHelper>();
 builder.Services.AddSingleton<IHeatTreatService, HeatTreatService>();
@@ -34,6 +44,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<HeatTreatMasterDataInitializer>();
+    await initializer.InitializeAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -59,4 +75,4 @@ app.MapRazorComponents<App>()
    .AddInteractiveWebAssemblyRenderMode()
    .AddAdditionalAssemblies(typeof(NDAProcesses.Client._Imports).Assembly);
 
-app.Run();
+await app.RunAsync();
