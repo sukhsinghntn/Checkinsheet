@@ -8,25 +8,27 @@ namespace NDAProcesses.Server.Data;
 
 public class HeatTreatMasterDataInitializer
 {
-    private readonly HeatTreatDbContext _context;
+    private readonly IDbContextFactory<HeatTreatDbContext> _dbContextFactory;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<HeatTreatMasterDataInitializer> _logger;
 
     public HeatTreatMasterDataInitializer(
-        HeatTreatDbContext context,
+        IDbContextFactory<HeatTreatDbContext> dbContextFactory,
         IWebHostEnvironment environment,
         ILogger<HeatTreatMasterDataInitializer> logger)
     {
-        _context = context;
+        _dbContextFactory = dbContextFactory;
         _environment = environment;
         _logger = logger;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await _context.Database.EnsureCreatedAsync(cancellationToken);
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        if (await _context.HeatTreatMasterRecords.AnyAsync(cancellationToken))
+        await context.Database.EnsureCreatedAsync(cancellationToken);
+
+        if (await context.HeatTreatMasterRecords.AnyAsync(cancellationToken))
         {
             return;
         }
@@ -67,8 +69,8 @@ public class HeatTreatMasterDataInitializer
             return;
         }
 
-        _context.HeatTreatMasterRecords.AddRange(normalizedRecords);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.HeatTreatMasterRecords.AddRange(normalizedRecords);
+        await context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Seeded {Count} heat treat master records from {Path}", normalizedRecords.Count, dataPath);
     }

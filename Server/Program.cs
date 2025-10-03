@@ -27,9 +27,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<HeatTreatDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
 builder.Services.AddDbContextFactory<HeatTreatDbContext>(options =>
     options.UseSqlServer(connectionString));
 
