@@ -1,0 +1,74 @@
+{
+  "typeOfTestOptions": [
+    "C/O",
+    "S/C",
+    "4HR",
+    "8HR",
+    "24HR",
+    "EOR",
+    "DEV",
+    "PPAP",
+    "SPECIAL",
+    "JACKET CLEAN",
+    "TANK CLEAN"
+  ],
+  "shiftOptions": [
+    "1ST",
+    "2ND",
+    "3RD"
+  ],
+  "lineOptions": [
+    "H-1",
+    "H-2",
+    "H-3",
+    "H-4",
+    "H-5",
+    "H-6",
+    "H-13",
+    "H-14",
+    "H-15",
+    "H-16",
+    "H-17",
+    "H-18",
+    "H-19",
+    "H-99"
+  ],
+  "passFailOptions": [
+    "YES",
+    "NO",
+    "1L1R Only",
+    "2L2R Only"
+  ],
+  "hardnessSpecs": [
+    "HRC 56-61",
+    "HRC 56-63"
+  ],
+  "caseDepthRanges": [
+    "5.5-7.5",
+    "8.5-10.5"
+  ],
+  "judgementOptions": [
+    "WAITING",
+    "PASS",
+    "FAIL"
+  ],
+  "operatorIds": [
+    "123",
+    "1234",
+    "12345",
+    "123456",
+    "1234567",
+    "12345678",
+    "123456789",
+    "jason"
+  ],
+  "operatorNames": [
+    "Kevin P.",
+    "Gloria K.",
+    "Alex B.",
+    "Travis R.",
+    "Kyler L.",
+    "Kevin R.",
+    "Jason N."
+  ]
+}

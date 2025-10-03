@@ -1,35 +1,326 @@
 @page "/"
+@using NDAProcesses.Shared.Models.HeatTreat
+@inject HeatTreatDataService DataService
+@inject NotificationService NotificationService
 
-<PageTitle>Index</PageTitle>
-<RadzenRow Gap="5" RowGap="5">
-    <RadzenColumn Size="12">
-        <RadzenText Text="Welcome to your new app" TextStyle="Radzen.Blazor.TextStyle.DisplayH2" TagName="Radzen.Blazor.TagName.Auto"></RadzenText>
-        <RadzenText Text="Your Success Is Our Biggest Priority" TextStyle="Radzen.Blazor.TextStyle.H4" TagName="Radzen.Blazor.TagName.H2" class="mt-5"></RadzenText>
-        <RadzenText Text="With Radzen Blazor Studio, application development is just one-click away." TextStyle="Radzen.Blazor.TextStyle.Body1" TagName="Radzen.Blazor.TagName.Auto" class="mt-4" Style="font-size: 20px; line-height: 24px"></RadzenText>
-        <RadzenText Text="Simple to setup, maintain and update." TextStyle="Radzen.Blazor.TextStyle.Body1" TagName="Radzen.Blazor.TagName.Auto" class="mt-3" Style="font-size: 20px; line-height: 24px"></RadzenText>
-        <RadzenCard Style="margin-top: 40px; padding: 20px 40px 40px;">
-            <RadzenRow>
-                <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenIcon Icon="smart_button" Style="margin-top: 20px; width: 48px; height: 48px; font-size: 48px; color: var(--rz-text-title-color);"></RadzenIcon>
-                    <RadzenText Text="Learn the Fundamentals" TextStyle="Radzen.Blazor.TextStyle.DisplayH6" TagName="Radzen.Blazor.TagName.H3"></RadzenText>
-                    <RadzenLink Text="Docs" Path="https://www.radzen.com/blazor-studio/documentation/" Icon="east" Target="_blank" Style="font-size: 18px"></RadzenLink>
-                    <RadzenLink Text="Videos" Path="https://youtube.com/playlist?list=PLQyJPeb3xHcBij_RbHD__2TOo8Jv5HQVc" Icon="east" Target="_blank" Style="display: block; font-size: 18px"></RadzenLink>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenIcon Icon="code" Style="margin-top: 20px; width: 48px; height: 48px; font-size: 48px; color: var(--rz-text-title-color);"></RadzenIcon>
-                    <RadzenText Text="Radzen Blazor Components" TextStyle="Radzen.Blazor.TextStyle.DisplayH6" TagName="Radzen.Blazor.TagName.H3"></RadzenText>
-                    <RadzenLink Text="Demos" Path="https://blazor.radzen.com" Icon="east" Target="_blank" Style="font-size: 18px"></RadzenLink>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenIcon Icon="people_outline" Style="margin-top: 20px; width: 48px; height: 48px; font-size: 48px; color: var(--rz-text-title-color);"></RadzenIcon>
-                    <RadzenText Text="Radzen Community" TextStyle="Radzen.Blazor.TextStyle.DisplayH6" TagName="Radzen.Blazor.TagName.H3"></RadzenText>
-                    <RadzenLink Text="Radzen Blazor Studio Forums" Path="https://forum.radzen.com/c/radzen-blazor-studio/12" Icon="east" Target="_blank" Style="font-size: 18px"></RadzenLink>
-                </RadzenColumn>
-            </RadzenRow>
-        </RadzenCard>
-    </RadzenColumn>
-</RadzenRow>
+<PageTitle>Heat Treat Verification Measurements</PageTitle>
 
-@code {
+@if (_isLoading)
+{
+    <div class="rz-p-4">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="width: 100%;" />
+    </div>
 }
+else
+{
+    <RadzenTemplateForm Data="_formState" Submit="HandleSubmit">
+        <RadzenCard Style="margin-bottom: 24px;">
+            <HeaderTemplate>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h2 class="m-0">Heat Treat Verification Measurements</h2>
+                    <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Primary" Type="ButtonType.Submit" Text="Save" />
+                </div>
+            </HeaderTemplate>
 
+            <ChildContent>
+                <RadzenFieldset Text="Part Selection" Class="mb-4">
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Component="partNumber" Text="Part Number" />
+                            <RadzenDropDown TValue="string"
+                                            Value="_selectedPartNumber"
+                                            ValueChanged="@(async (string? value) => await OnPartNumberChanged(value))"
+                                            ValueExpression="(() => _selectedPartNumber)"
+                                            Data="_parts"
+                                            TextProperty="PartNumber"
+                                            ValueProperty="PartNumber"
+                                            AllowClear="true"
+                                            Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="Customer" />
+                            <RadzenTextBox ReadOnly="true" Value="@(_selectedPart?.Customer ?? string.Empty)" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenLabel Text="CQI Category" />
+                            <RadzenTextBox ReadOnly="true" Value="@(_selectedPart?.CqiCustomerCategory ?? string.Empty)" Style="width: 100%;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow Class="mt-3">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Inspection Date" />
+                            <RadzenDatePicker @bind-Value="_formState.InspectionDate" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Inspection Time" />
+                            <RadzenTimePicker @bind-Value="_formState.InspectionTime" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Shift" />
+                            <RadzenDropDown @bind-Value="_formState.Shift" Data="_references.ShiftOptions" AllowClear="true" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Line" />
+                            <RadzenDropDown @bind-Value="_formState.Line" Data="_references.LineOptions" AllowClear="true" Style="width: 100%;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow Class="mt-3">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Type of Test" />
+                            <RadzenDropDown @bind-Value="_formState.TypeOfTest" Data="_references.TypeOfTestOptions" AllowClear="true" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Inspector" />
+                            <RadzenTextBox @bind-Value="_formState.Inspector" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Stamp #" />
+                            <RadzenTextBox @bind-Value="_formState.StampNumber" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Pass?" />
+                            <RadzenDropDown @bind-Value="_formState.PassStatus" Data="_references.PassFailOptions" AllowClear="true" Style="width: 100%;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow Class="mt-3">
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenLabel Text="Adjustments Required" />
+                            <RadzenTextBox @bind-Value="_formState.AdjustmentsRequired" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Sequence" />
+                            <RadzenNumeric @bind-Value="_formState.SampleSequence" TValue="int?" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Override Axis" />
+                            <RadzenTextBox ReadOnly="true" Value="@(CalculateNonCqiOverride()?.ToString() ?? string.Empty)" Style="width: 100%;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenFieldset>
+
+                @if (_selectedPart is not null)
+                {
+                    <RadzenFieldset Text="BJ Side" Class="mb-4">
+                        <RadzenRow>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Non Hardened Area" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.BjNonHardenedArea" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Spline O.P.D. Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.BjSplineOpdSpecification" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Min - Max" />
+                                <RadzenTextBox ReadOnly="true" Value="@FormatSpecificationRange(BjSplineRange)" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Gauge" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.BjClipRingGauge" Style="width: 100%;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                        <RadzenTabs Class="mt-3">
+                            @foreach (var sample in _formState.Samples)
+                            {
+                                <RadzenTabsItem Text=$"Sample #{sample.Number}">
+                                    <div class="measurement-table">
+                                        <table class="rz-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Axis</th>
+                                                    <th>Measured</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var measurement in sample.BjMeasurements)
+                                                {
+                                                    <tr>
+                                                        <td>@measurement.Point</td>
+                                                        <td>
+                                                            <RadzenNumeric @bind-Value="measurement.Value" TValue="double?" Style="width: 100%;" />
+                                                        </td>
+                                                        <td>@FormatResult(EvaluateBjMeasurement(measurement))</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </RadzenTabsItem>
+                            }
+                        </RadzenTabs>
+                    </RadzenFieldset>
+
+                    <RadzenFieldset Text="DOJ Side" Class="mb-4">
+                        <RadzenRow>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Non Hardened Area" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.DojNonHardenedArea" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Spline O.P.D. Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.DojSplineOpdSpecification" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Min - Max" />
+                                <RadzenTextBox ReadOnly="true" Value="@FormatSpecificationRange(DojSplineRange)" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Gauge" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.DojClipRingGauge" Style="width: 100%;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                        <RadzenTabs Class="mt-3">
+                            @foreach (var sample in _formState.Samples)
+                            {
+                                <RadzenTabsItem Text=$"Sample #{sample.Number}">
+                                    <div class="measurement-table">
+                                        <table class="rz-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Axis</th>
+                                                    <th>Measured</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var measurement in sample.DojMeasurements)
+                                                {
+                                                    <tr>
+                                                        <td>@measurement.Point</td>
+                                                        <td>
+                                                            <RadzenNumeric @bind-Value="measurement.Value" TValue="double?" Style="width: 100%;" />
+                                                        </td>
+                                                        <td>@FormatResult(EvaluateDojMeasurement(measurement))</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </RadzenTabsItem>
+                            }
+                        </RadzenTabs>
+                    </RadzenFieldset>
+
+                    <RadzenFieldset Text="Clip Groove & Case Depth" Class="mb-4">
+                        <RadzenRow>
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Clip Groove Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.ClipGrooveSpecification" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Measure Location" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.ClipGrooveMeasureLocation" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Measured" />
+                                <RadzenNumeric @bind-Value="_formState.ClipGrooveMeasurement" TValue="double?" Style="width: 100%;" />
+                                <RadzenLabel Text=$"Result: {FormatResult(EvaluateClipGroove())}" Style="display:block;margin-top:6px;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow Class="mt-3">
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Case Depth Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.CaseDepthSpecification" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Measured" />
+                                <RadzenNumeric @bind-Value="_formState.CaseDepthMeasurement" TValue="double?" Style="width: 100%;" />
+                                <RadzenLabel Text=$"Result: {FormatResult(EvaluateCaseDepth())}" Style="display:block;margin-top:6px;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="4">
+                                <RadzenLabel Text="Hardness Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.HardnessSpecification" Style="width: 100%;" />
+                                <RadzenNumeric @bind-Value="_formState.Samples[0].HardnessMeasurement" TValue="double?" Style="width: 100%; margin-top: 8px;" Placeholder="Hardness" />
+                                <RadzenLabel Text=$"Result: {FormatResult(EvaluateHardness(_formState.Samples[0].HardnessMeasurement))}" Style="display:block;margin-top:6px;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenFieldset>
+
+                    <RadzenFieldset Text="Gauge Checks" Class="mb-4">
+                        <RadzenRow>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="BJ Clip Width Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.BjClipWidth" Style="width: 100%;" />
+                                <RadzenNumeric @bind-Value="_formState.BjClipWidthMeasured" TValue="double?" Style="width: 100%; margin-top: 6px;" Placeholder="Measured" />
+                                <RadzenLabel Text=$"Result: {FormatResult(EvaluateBjClipWidth())}" Style="display:block;margin-top:6px;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="DOJ Clip Width Spec" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.DojClipWidth" Style="width: 100%;" />
+                                <RadzenNumeric @bind-Value="_formState.DojClipWidthMeasured" TValue="double?" Style="width: 100%; margin-top: 6px;" Placeholder="Measured" />
+                                <RadzenLabel Text=$"Result: {FormatResult(EvaluateDojClipWidth())}" Style="display:block;margin-top:6px;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="BJ H Gauge" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.BjHGauge" Style="width: 100%;" />
+                                <RadzenNumeric @bind-Value="_formState.BjHGaugeMeasured" TValue="double?" Style="width: 100%; margin-top: 6px;" Placeholder="Measured" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="DOJ H Gauge" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.DojHGauge" Style="width: 100%;" />
+                                <RadzenNumeric @bind-Value="_formState.DojHGaugeMeasured" TValue="double?" Style="width: 100%; margin-top: 6px;" Placeholder="Measured" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow Class="mt-3">
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenLabel Text="BJ Spline Gauge" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.BjClipRingGauge" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenLabel Text="DOJ Spline Gauge" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.DojClipRingGauge" Style="width: 100%;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenFieldset>
+
+                    <RadzenFieldset Text="EddySonix" Class="mb-4">
+                        <RadzenRow>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Requires Scan" />
+                                <RadzenCheckBox @bind-Value="_formState.PartNeedsEddySonixScan" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="Judgement" />
+                                <RadzenDropDown @bind-Value="_formState.EddySonixJudgement" Data="_references.JudgementOptions" AllowClear="true" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="X" />
+                                <RadzenNumeric @bind-Value="_formState.EddySonixX" TValue="double?" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="3">
+                                <RadzenLabel Text="V" />
+                                <RadzenNumeric @bind-Value="_formState.EddySonixV" TValue="double?" Style="width: 100%;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow Class="mt-3">
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenLabel Text="Approved Program" />
+                                <RadzenTextBox ReadOnly="true" Value="@_selectedPart.EsApprovedProgram" Style="width: 100%;" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenLabel Text="Pieces to Cut" />
+                                <RadzenNumeric Value="@_selectedPart.PiecesToCut" TValue="double?" ReadOnly="true" Style="width: 100%;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenFieldset>
+                }
+
+                <RadzenFieldset Text="Notes" Class="mb-4">
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenLabel Text="Verified By" />
+                            <RadzenTextBox @bind-Value="_formState.VerifiedBy" Style="width: 100%;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenLabel Text="Notes" />
+                            <RadzenTextArea @bind-Value="_formState.Notes" Style="width: 100%; min-height: 140px;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenFieldset>
+            </ChildContent>
+        </RadzenCard>
+    </RadzenTemplateForm>
+}
