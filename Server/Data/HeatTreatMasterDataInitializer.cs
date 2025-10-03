@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NDAProcesses.Shared.Models;
+using NDAProcesses.Shared.Serialization;
 
 namespace NDAProcesses.Server.Data;
 
@@ -41,10 +42,13 @@ public class HeatTreatMasterDataInitializer
         }
 
         await using var stream = File.OpenRead(dataPath);
-        var seedRecords = await JsonSerializer.DeserializeAsync<List<HeatTreatMasterRecord>>(stream, new JsonSerializerOptions
+        var serializerOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
-        }, cancellationToken) ?? [];
+        };
+        serializerOptions.Converters.Add(new FlexibleStringJsonConverter());
+
+        var seedRecords = await JsonSerializer.DeserializeAsync<List<HeatTreatMasterRecord>>(stream, serializerOptions, cancellationToken) ?? [];
 
         if (seedRecords.Count == 0)
         {
