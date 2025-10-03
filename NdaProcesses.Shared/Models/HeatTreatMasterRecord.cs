@@ -214,6 +214,7 @@ public class HeatTreatMasterRecord
     public string? Eddysonix { get; set; }
 
     [JsonPropertyName("cutPieceCount")]
+    [JsonConverter(typeof(FlexibleNullableDoubleConverter))]
     public double? CutPieceCount { get; set; }
 
     [JsonPropertyName("cqiCustomer")]
