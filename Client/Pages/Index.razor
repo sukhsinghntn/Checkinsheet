@@ -1,35 +1,887 @@
 @page "/"
+@using NDAProcesses.Shared.Models
+@inject IHeatTreatService HeatTreatService
 
-<PageTitle>Index</PageTitle>
-<RadzenRow Gap="5" RowGap="5">
-    <RadzenColumn Size="12">
-        <RadzenText Text="Welcome to your new app" TextStyle="Radzen.Blazor.TextStyle.DisplayH2" TagName="Radzen.Blazor.TagName.Auto"></RadzenText>
-        <RadzenText Text="Your Success Is Our Biggest Priority" TextStyle="Radzen.Blazor.TextStyle.H4" TagName="Radzen.Blazor.TagName.H2" class="mt-5"></RadzenText>
-        <RadzenText Text="With Radzen Blazor Studio, application development is just one-click away." TextStyle="Radzen.Blazor.TextStyle.Body1" TagName="Radzen.Blazor.TagName.Auto" class="mt-4" Style="font-size: 20px; line-height: 24px"></RadzenText>
-        <RadzenText Text="Simple to setup, maintain and update." TextStyle="Radzen.Blazor.TextStyle.Body1" TagName="Radzen.Blazor.TagName.Auto" class="mt-3" Style="font-size: 20px; line-height: 24px"></RadzenText>
-        <RadzenCard Style="margin-top: 40px; padding: 20px 40px 40px;">
-            <RadzenRow>
-                <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenIcon Icon="smart_button" Style="margin-top: 20px; width: 48px; height: 48px; font-size: 48px; color: var(--rz-text-title-color);"></RadzenIcon>
-                    <RadzenText Text="Learn the Fundamentals" TextStyle="Radzen.Blazor.TextStyle.DisplayH6" TagName="Radzen.Blazor.TagName.H3"></RadzenText>
-                    <RadzenLink Text="Docs" Path="https://www.radzen.com/blazor-studio/documentation/" Icon="east" Target="_blank" Style="font-size: 18px"></RadzenLink>
-                    <RadzenLink Text="Videos" Path="https://youtube.com/playlist?list=PLQyJPeb3xHcBij_RbHD__2TOo8Jv5HQVc" Icon="east" Target="_blank" Style="display: block; font-size: 18px"></RadzenLink>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenIcon Icon="code" Style="margin-top: 20px; width: 48px; height: 48px; font-size: 48px; color: var(--rz-text-title-color);"></RadzenIcon>
-                    <RadzenText Text="Radzen Blazor Components" TextStyle="Radzen.Blazor.TextStyle.DisplayH6" TagName="Radzen.Blazor.TagName.H3"></RadzenText>
-                    <RadzenLink Text="Demos" Path="https://blazor.radzen.com" Icon="east" Target="_blank" Style="font-size: 18px"></RadzenLink>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="4">
-                    <RadzenIcon Icon="people_outline" Style="margin-top: 20px; width: 48px; height: 48px; font-size: 48px; color: var(--rz-text-title-color);"></RadzenIcon>
-                    <RadzenText Text="Radzen Community" TextStyle="Radzen.Blazor.TextStyle.DisplayH6" TagName="Radzen.Blazor.TagName.H3"></RadzenText>
-                    <RadzenLink Text="Radzen Blazor Studio Forums" Path="https://forum.radzen.com/c/radzen-blazor-studio/12" Icon="east" Target="_blank" Style="font-size: 18px"></RadzenLink>
-                </RadzenColumn>
-            </RadzenRow>
+<PageTitle>Heat Treat Verification Measurements</PageTitle>
+
+<div class="page-header">
+    <RadzenHeading Size="H2" Text="Heat Treat Verification Measurements"></RadzenHeading>
+    <RadzenText Text="Complete the verification form and capture measurements directly in the browser." Style="display:block; margin-top: 0.25rem;" />
+</div>
+
+@if (_isLoading)
+{
+    <div class="heat-treat-loading">
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="width: 320px;" />
+        <RadzenText Text="Loading part library…" Style="margin-top: 0.5rem;" />
+    </div>
+}
+else if (!string.IsNullOrWhiteSpace(_loadError))
+{
+    <RadzenAlert Severity="AlertSeverity.Error" Style="margin-top: 1rem;">@_loadError</RadzenAlert>
+}
+else
+{
+    <RadzenTabs Class="workbook-tabs">
+        <Tabs>
+            <RadzenTabsItem Text="HT Inspection Form">
+                <ChildContent>
+                    <div class="heat-treat-layout">
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">General Information</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-grid">
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Date" />
+                            <RadzenDatePicker @bind-Value="_form.Date" TValue="DateTime?" Style="width: 100%;" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Time" />
+                            <RadzenTimePicker Value="_form.Time" ValueChanged="OnTimeChanged" TValue="DateTime?" Style="width: 100%;" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Inspector" />
+                            <RadzenTextBox @bind-Value="_form.Inspector" TValue="string" Style="width: 100%;" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Shift" />
+                            <RadzenDropDown Data="_shiftOptions" @bind-Value="_form.Shift" TValue="string" Style="width: 100%;" AllowClear="true" Placeholder="Select shift" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Line" />
+                            <RadzenDropDown Data="_lineOptions" @bind-Value="_form.Line" TValue="string" Style="width: 100%;" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowClear="true" Placeholder="Select line" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Type of Test" />
+                            <RadzenDropDown Data="_testTypeOptions" @bind-Value="_form.TypeOfTest" TValue="string" Style="width: 100%;" AllowClear="true" Placeholder="Select type" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Part Number" />
+                            <RadzenDropDown Data="_records" TextProperty="PartNumber" ValueProperty="PartNumber" @bind-Value="_form.PartNumber" TValue="string" Change="OnPartNumberChanged" Style="width: 100%;" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Search part" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Stamp Number" />
+                            <RadzenTextBox @bind-Value="_form.StampNumber" TValue="string" Style="width: 100%;" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Pass" />
+                            <RadzenDropDown Data="_passOptions" @bind-Value="_form.PassStatus" TValue="string" Style="width: 100%;" AllowClear="true" Placeholder="Select" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="Adjustments Required" />
+                            <RadzenTextBox @bind-Value="_form.AdjustmentsRequired" TValue="string" Style="width: 100%;" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="EddySonix Cycle (Q10)" />
+                            <RadzenNumeric @bind-Value="_form.Q10" TValue="int?" Style="width: 100%;" Min="1" Max="4" Step="1" />
+                        </div>
+                        <div class="heat-treat-field">
+                            <RadzenLabel Text="EddySonix Judgement" />
+                            <RadzenTextBox @bind-Value="_form.EddysonixJudgement" TValue="string" Style="width: 100%;" />
+                        </div>
+                    </div>
+                    <div class="heat-treat-textarea">
+                        <RadzenLabel Text="Notes" />
+                        <RadzenTextArea @bind-Value="_form.Notes" TValue="string" Style="width: 100%;" Rows="3" />
+                    </div>
+                </div>
+            </ChildContent>
         </RadzenCard>
-    </RadzenColumn>
-</RadzenRow>
 
-@code {
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">Part Summary</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Customer</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.Customer)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">ES Approved Program</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.EsApprovedProgram)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">EddySonix Program</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.Eddysonix)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">ADCDE (half) FG</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.AdcdeHalfFg)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">ABCDE (full) FG</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.AbcdeFullFg)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Hollow Shaft</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.HollowShaft)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">CQI Indicator (Q12)</span>
+                            <span class="summary-value">@DisplayValue(ComputeCqiIndicator())</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">EddySonix Cycle Assignment (Q11)</span>
+                            <span class="summary-value">@DisplayValue(ComputeQ11())</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label"># of Pieces to Scan</span>
+                            <span class="summary-value">@FormatNumber(_selectedRecord?.CutPieceCount)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Special Instructions</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.SpecialInstructions)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">C to C Measure Location</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.ClipGrooveMeasureLocation)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Clip to Clip Spec</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.ClipGrooveToClipGroove)</span>
+                        </div>
+                    </div>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">BJ Side Measurements</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-spec">
+                        <div>Non Hardened Area: <strong>@DisplayValue(_selectedRecord?.BjNonHardenedArea)</strong></div>
+                        <div>@BjSplineLabel: <strong>@DisplayValue(_selectedRecord?.BjSplineOpdDisplay)</strong></div>
+                    </div>
+                    <table class="heat-treat-table">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Non Hardened Area</th>
+                                <th>@BjSplineLabel</th>
+                                <th>Bottom SPLINE O.P.D.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var measurement in _bjMeasurements)
+                            {
+                                <tr>
+                                    <td>@measurement.Position</td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="measurement.NonHardened" TValue="decimal?" Style="width: 100%;" Step="0.001" />
+                                    </td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="measurement.TopSpline" TValue="decimal?" Style="width: 100%;" Step="0.001" />
+                                    </td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="measurement.BottomSpline" TValue="decimal?" Style="width: 100%;" Step="0.001" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">DOJ Side Measurements</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-spec">
+                        <div>Non Hardened Area: <strong>@DisplayValue(_selectedRecord?.DojNonHardenedArea)</strong></div>
+                        <div>@BjSplineLabel: <strong>@DisplayValue(_selectedRecord?.DojSplineOpdDisplay)</strong></div>
+                    </div>
+                    <table class="heat-treat-table">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Non Hardened Area</th>
+                                <th>@BjSplineLabel</th>
+                                <th>Bottom SPLINE O.P.D.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var measurement in _dojMeasurements)
+                            {
+                                <tr>
+                                    <td>@measurement.Position</td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="measurement.NonHardened" TValue="decimal?" Style="width: 100%;" Step="0.001" />
+                                    </td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="measurement.TopSpline" TValue="decimal?" Style="width: 100%;" Step="0.001" />
+                                    </td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="measurement.BottomSpline" TValue="decimal?" Style="width: 100%;" Step="0.001" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">Hardness &amp; Case Depth</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-spec">
+                        <div>Rockwell Hardness Spec: <strong>@DisplayValue(_selectedRecord?.Hardness)</strong></div>
+                        <div>Case Depth Spec: <strong>@DisplayValue(_selectedRecord?.CaseDepth)</strong></div>
+                    </div>
+                    <table class="heat-treat-table">
+                        <thead>
+                            <tr>
+                                <th>Point</th>
+                                <th>Measurement</th>
+                                <th>Pass?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var point in _hardnessPoints)
+                            {
+                                <tr>
+                                    <td>@point.Position</td>
+                                    <td>
+                                        <RadzenNumeric @bind-Value="point.Value" TValue="decimal?" Style="width: 100%;" Step="0.1" />
+                                    </td>
+                                    <td>
+                                        <RadzenCheckBox @bind-Value="point.Pass" TValue="bool?" TriState="true" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">Gauges &amp; Fixtures</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">BJ Spline Gauge</span>
+                            <span class="summary-value">@DisplayValue(FormatNumber(_selectedRecord?.BjSplineOpdNominal, includePlusMinus: true, tolerance: _selectedRecord?.BjSplineOpdTolerance))</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">DOJ Spline Gauge</span>
+                            <span class="summary-value">@DisplayValue(FormatNumber(_selectedRecord?.DojSplineOpdNominal, includePlusMinus: true, tolerance: _selectedRecord?.DojSplineOpdTolerance))</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">BJ Clip Ring Gauge</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.BjClipRingGauge)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">DOJ Clip Ring Gauge</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.DojClipRingGauge)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">BJ H Gauge</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.BjHGauge)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">DOJ H Gauge</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.DojHGauge)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">BJ Clip Width</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.BjClipWidth)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">DOJ Clip Width</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.DojClipWidth)</span>
+                        </div>
+                    </div>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">EddySonix Setup</div>
+                <div class="heat-treat-card-body">
+                    <div class="heat-treat-summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Scan Required</span>
+                            <span class="summary-value">@(ScanRequired ? "Yes" : "No")</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">X Value</span>
+                            <span class="summary-value">@FormatNumber(_selectedRecord?.XValue)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">V Value</span>
+                            <span class="summary-value">@DisplayValue(_selectedRecord?.VValue)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Operator Judgement</span>
+                            <span class="summary-value">@DisplayValue(_form.EddysonixJudgement)</span>
+                        </div>
+                    </div>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+
+        <RadzenCard Class="heat-treat-section">
+            <ChildContent>
+                <div class="heat-treat-card-header">Cut &amp; Marking Dimensions</div>
+                <div class="heat-treat-card-body">
+                    <table class="heat-treat-table">
+                        <thead>
+                            <tr>
+                                <th>Segment</th>
+                                <th>Start</th>
+                                <th>End</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var segment in GetCutSegments())
+                            {
+                                <tr>
+                                    <td>@segment.Label</td>
+                                    <td>@DisplayValue(segment.Start)</td>
+                                    <td>@DisplayValue(segment.End)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="heat-treat-marking">
+                        <RadzenLabel Text="Additional Layout Notes" />
+                        <RadzenTextArea @bind-Value="_form.MarkingNotes" TValue="string" Style="width: 100%;" Rows="3" Placeholder="Record BJ/DOJ spline patterns, cut layouts, etc." />
+                    </div>
+                </div>
+            </ChildContent>
+        </RadzenCard>
+                    </div>
+                </ChildContent>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Traveler">
+                <ChildContent>
+                    <div class="excel-page traveler-page">
+                        <div class="excel-header">
+                            <div class="excel-title">NTN Driveshaft Anderson, Inc.</div>
+                            <div class="excel-subtitle">Heat Treat Verification Traveler</div>
+                        </div>
+                        <div class="excel-metadata-grid">
+                            <div>
+                                <span class="excel-label">Inspection Date</span>
+                                <span class="excel-value">@DisplayValue(_form.Date?.ToShortDateString())</span>
+                            </div>
+                            <div>
+                                <span class="excel-label">Inspection Time</span>
+                                <span class="excel-value">@DisplayValue(_form.Time?.ToShortTimeString())</span>
+                            </div>
+                            <div>
+                                <span class="excel-label">Inspector</span>
+                                <span class="excel-value">@DisplayValue(_form.Inspector)</span>
+                            </div>
+                            <div>
+                                <span class="excel-label">Shift</span>
+                                <span class="excel-value">@DisplayValue(_form.Shift)</span>
+                            </div>
+                            <div>
+                                <span class="excel-label">Line</span>
+                                <span class="excel-value">@DisplayValue(_form.Line)</span>
+                            </div>
+                            <div>
+                                <span class="excel-label">Type of Test</span>
+                                <span class="excel-value">@DisplayValue(_form.TypeOfTest)</span>
+                            </div>
+                        </div>
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4">Traveler Overview</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="excel-label">Part Number</td>
+                                    <td class="excel-value">@DisplayValue(_form.PartNumber)</td>
+                                    <td class="excel-label">Customer</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.Customer)</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">ADCDE (half) FG</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.AdcdeHalfFg)</td>
+                                    <td class="excel-label">ABCDE (full) FG</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.AbcdeFullFg)</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">EddySonix Program</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.Eddysonix)</td>
+                                    <td class="excel-label">ES Approved Program</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.EsApprovedProgram)</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">CQI Indicator (Q12)</td>
+                                    <td class="excel-value">@DisplayValue(ComputeCqiIndicator())</td>
+                                    <td class="excel-label">Cycle Assignment (Q11)</td>
+                                    <td class="excel-value">@DisplayValue(ComputeQ11())</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">Pieces to Scan</td>
+                                    <td class="excel-value">@FormatNumber(_selectedRecord?.CutPieceCount)</td>
+                                    <td class="excel-label">Special Instructions</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.SpecialInstructions)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="excel-split-grid">
+                            <table class="excel-table">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">BJ Specifications</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="excel-label">Non Hardened Area</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.BjNonHardenedArea)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">Spline O.P.D.</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.BjSplineOpdDisplay)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">Gauge Nominal</td>
+                                        <td class="excel-value">@DisplayValue(FormatNumber(_selectedRecord?.BjSplineOpdNominal, includePlusMinus: true, tolerance: _selectedRecord?.BjSplineOpdTolerance))</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">Clip Ring Gauge</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.BjClipRingGauge)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">H Gauge</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.BjHGauge)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="excel-table">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">DOJ Specifications</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="excel-label">Non Hardened Area</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.DojNonHardenedArea)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">Spline O.P.D.</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.DojSplineOpdDisplay)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">Gauge Nominal</td>
+                                        <td class="excel-value">@DisplayValue(FormatNumber(_selectedRecord?.DojSplineOpdNominal, includePlusMinus: true, tolerance: _selectedRecord?.DojSplineOpdTolerance))</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">Clip Ring Gauge</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.DojClipRingGauge)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="excel-label">H Gauge</td>
+                                        <td class="excel-value">@DisplayValue(_selectedRecord?.DojHGauge)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="3">Clip to Clip Specifications</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="excel-label">Spec</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.ClipGrooveToClipGroove)</td>
+                                    <td class="excel-value excel-note">@DisplayValue(_selectedRecord?.ClipGrooveMeasureLocation)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ChildContent>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Adjustment Ticket">
+                <ChildContent>
+                    <div class="excel-page adjustment-page">
+                        <div class="excel-header">
+                            <div class="excel-title">Print Adjustment Ticket</div>
+                            <div class="excel-subtitle">Document adjustments required for the selected part.</div>
+                        </div>
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th>Area</th>
+                                    <th>Specification</th>
+                                    <th>Recorded Measurement</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ticket in _adjustmentRows)
+                                {
+                                    <tr>
+                                        <td class="excel-label">@ticket.Area</td>
+                                        <td class="excel-value">@ticket.Specification</td>
+                                        <td>
+                                            <RadzenTextBox @bind-Value="ticket.Measured" TValue="string" Style="width: 100%;" Placeholder="Enter measurement" />
+                                        </td>
+                                        <td>
+                                            <RadzenDropDown Data="_passOptions" @bind-Value="ticket.Status" TValue="string" Style="width: 100%;" AllowClear="true" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div class="excel-notes">
+                            <RadzenLabel Text="Adjustment Notes" />
+                            <RadzenTextArea @bind-Value="_form.AdjustmentsRequired" TValue="string" Rows="4" Style="width: 100%;" Placeholder="Summarize actions taken, tooling changes, or rework performed." />
+                        </div>
+                    </div>
+                </ChildContent>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="ESResults">
+                <ChildContent>
+                    <div class="excel-page es-page">
+                        <div class="excel-header">
+                            <div class="excel-title">EddySonix Results</div>
+                            <div class="excel-subtitle">Capture and review ES cycle data.</div>
+                        </div>
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                    <th>Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="excel-label">Cycle Assignment (Q11)</td>
+                                    <td class="excel-value">@DisplayValue(ComputeQ11())</td>
+                                    <td rowspan="4" class="excel-wide">
+                                        <RadzenTextArea @bind-Value="_form.EddysonixJudgement" TValue="string" Rows="6" Style="width: 100%;" Placeholder="Record judgement, alarms, or pass/fail observations." />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">CQI Indicator (Q12)</td>
+                                    <td class="excel-value">@DisplayValue(ComputeCqiIndicator())</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">Scan Required</td>
+                                    <td class="excel-value">@(ScanRequired ? "YES" : "NO")</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">Pieces to Scan</td>
+                                    <td class="excel-value">@FormatNumber(_selectedRecord?.CutPieceCount)</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">X Value</td>
+                                    <td class="excel-value">@FormatNumber(_selectedRecord?.XValue)</td>
+                                    <td class="excel-note">Use values directly from the controller results summary.</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">V Value</td>
+                                    <td class="excel-value">@DisplayValue(_selectedRecord?.VValue)</td>
+                                    <td class="excel-note">Document target reference for comparison.</td>
+                                </tr>
+                                <tr>
+                                    <td class="excel-label">Operator</td>
+                                    <td class="excel-value">@DisplayValue(_form.Inspector)</td>
+                                    <td class="excel-note">Operator responsible for ES verification.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ChildContent>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
 }
 
+@code {
+    private readonly IReadOnlyList<string> _shiftOptions = new[] { "1ST", "2ND", "3RD" };
+    private readonly IReadOnlyList<string> _testTypeOptions = new[] { "Initial", "Verification", "8HR", "Final" };
+    private readonly IReadOnlyList<string> _lineOptions = new[]
+    {
+        "H-1", "H-2", "H-3", "H-4", "H-5", "H-6",
+        "H-7", "H-8", "H-9", "H-10", "H-11", "H-12",
+        "H-13", "H-14", "H-15", "H-16", "H-17", "H-18", "H-19"
+    };
+    private readonly IReadOnlyList<string> _passOptions = new[] { "PASS", "FAIL" };
+
+    private readonly List<SplineMeasurement> _bjMeasurements = new()
+    {
+        new() { Position = "1/1L" },
+        new() { Position = "2/1R" },
+        new() { Position = "3/2L" },
+        new() { Position = "4/2R" }
+    };
+
+    private readonly List<SplineMeasurement> _dojMeasurements = new()
+    {
+        new() { Position = "1/1L" },
+        new() { Position = "2/1R" },
+        new() { Position = "3/2L" },
+        new() { Position = "4/2R" }
+    };
+
+    private readonly List<HardnessMeasurement> _hardnessPoints = new()
+    {
+        new("B1"),
+        new("B2"),
+        new("B3"),
+        new("B4")
+    };
+
+    private readonly AdjustmentTicketRowDefinition[] _adjustmentDefinitions =
+    {
+        new("BJ Non Hardened Area", record => DisplayValue(record?.BjNonHardenedArea)),
+        new("BJ SPLINE O.P.D.", record => DisplayValue(record?.BjSplineOpdDisplay)),
+        new("DOJ Non Hardened Area", record => DisplayValue(record?.DojNonHardenedArea)),
+        new("DOJ SPLINE O.P.D.", record => DisplayValue(record?.DojSplineOpdDisplay)),
+        new("Clip to Clip", record => DisplayValue(record?.ClipGrooveToClipGroove)),
+        new("Rockwell Hardness", record => DisplayValue(record?.Hardness)),
+        new("Case Depth", record => DisplayValue(record?.CaseDepth)),
+        new("EddySonix Program", record => DisplayValue(record?.Eddysonix))
+    };
+
+    private readonly HeatTreatFormState _form = new();
+    private List<HeatTreatMasterRecord> _records = new();
+    private HeatTreatMasterRecord? _selectedRecord;
+    private bool _isLoading = true;
+    private string? _loadError;
+    private List<AdjustmentTicketRow> _adjustmentRows = new();
+
+    private static readonly HashSet<string> BjVariantTokens = new(StringComparer.OrdinalIgnoreCase) { "BJ117", "BJ125" };
+    private static readonly HashSet<string> Group1 = new(StringComparer.OrdinalIgnoreCase) { "H-1", "H-2", "H-3", "H-4", "H-5" };
+    private static readonly HashSet<string> Group2 = new(StringComparer.OrdinalIgnoreCase) { "H-13", "H-14", "H-15", "H-16" };
+    private static readonly HashSet<string> Group3 = new(StringComparer.OrdinalIgnoreCase) { "H-17", "H-18", "H-19", "H-6" };
+
+    private bool ScanRequired => _selectedRecord?.CutPieceCount is double count && count > 0;
+    private string BjSplineLabel => HasBjVariant() ? "Top SPLINE O.P.D." : "SPLINE O.P.D.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var records = await HeatTreatService.GetMasterRecordsAsync();
+            _records = records.OrderBy(r => r.PartNumber, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        catch (Exception ex)
+        {
+            _loadError = $"Unable to load master data: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+
+        RefreshAdjustmentRows();
+    }
+
+    private void OnTimeChanged(DateTime? value)
+    {
+        _form.Time = value;
+    }
+
+    private async Task OnPartNumberChanged(object? value)
+    {
+        if (value is string partNumber && !string.IsNullOrWhiteSpace(partNumber))
+        {
+            _selectedRecord = _records.FirstOrDefault(record => string.Equals(record.PartNumber, partNumber, StringComparison.OrdinalIgnoreCase));
+            _form.PartNumber = partNumber;
+        }
+        else
+        {
+            _selectedRecord = null;
+            _form.PartNumber = null;
+        }
+
+        RefreshAdjustmentRows();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshAdjustmentRows()
+    {
+        var existing = _adjustmentRows.ToDictionary(row => row.Area, StringComparer.OrdinalIgnoreCase);
+        var updated = new List<AdjustmentTicketRow>(_adjustmentDefinitions.Length);
+
+        foreach (var definition in _adjustmentDefinitions)
+        {
+            if (!existing.TryGetValue(definition.Area, out var row))
+            {
+                row = new AdjustmentTicketRow(definition.Area);
+            }
+
+            row.Specification = definition.SpecificationFactory(_selectedRecord);
+            updated.Add(row);
+        }
+
+        _adjustmentRows = updated;
+    }
+
+    private bool HasBjVariant()
+    {
+        if (_selectedRecord?.PartNumber is not string partNumber)
+        {
+            return false;
+        }
+
+        return BjVariantTokens.Any(token => partNumber.Contains(token, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string? ComputeCqiIndicator()
+    {
+        return string.Equals(_selectedRecord?.CqiCustomer, "CQI Customer", StringComparison.OrdinalIgnoreCase) ? "1" : null;
+    }
+
+    private string? ComputeQ11()
+    {
+        if (!string.Equals(_selectedRecord?.CqiCustomer, "Non-CQI Customer", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        if (!string.Equals(_form.TypeOfTest, "8HR", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var shift = (_form.Shift ?? string.Empty).Trim().ToUpperInvariant();
+        var line = (_form.Line ?? string.Empty).Trim().ToUpperInvariant();
+        if (string.IsNullOrEmpty(shift) || string.IsNullOrEmpty(line))
+        {
+            return null;
+        }
+
+        var qualifies =
+            (Group1.Contains(line) && shift == "2ND") ||
+            (Group2.Contains(line) && shift == "3RD") ||
+            (Group3.Contains(line) && shift == "1ST") ||
+            (Group1.Contains(line) && shift == "3RD") ||
+            (Group2.Contains(line) && shift == "1ST") ||
+            (Group3.Contains(line) && shift == "2ND");
+
+        if (!qualifies)
+        {
+            return null;
+        }
+
+        var branchOne =
+            (Group1.Contains(line) && shift == "2ND") ||
+            (Group2.Contains(line) && shift == "3RD") ||
+            (Group3.Contains(line) && shift == "1ST");
+
+        return branchOne ? _form.Q10 switch
+        {
+            2 => "1",
+            1 => "2",
+            _ => null
+        } : _form.Q10 switch
+        {
+            2 => "3",
+            1 => "4",
+            _ => null
+        };
+    }
+
+    private IEnumerable<(string Label, string? Start, string? End)> GetCutSegments()
+    {
+        if (_selectedRecord is null)
+        {
+            yield break;
+        }
+
+        yield return ("A", _selectedRecord.AStart, _selectedRecord.AEnd);
+        yield return ("B", _selectedRecord.BStart, _selectedRecord.BEnd);
+        yield return ("C", _selectedRecord.CStart, _selectedRecord.CEnd);
+        yield return ("D", _selectedRecord.DStart, _selectedRecord.DEnd);
+        yield return ("E", _selectedRecord.EStart, _selectedRecord.EEnd);
+        yield return ("F", _selectedRecord.FStart, _selectedRecord.FEnd);
+        yield return ("G", _selectedRecord.GStart, _selectedRecord.GEnd);
+        yield return ("H", _selectedRecord.HStart, _selectedRecord.HEnd);
+        yield return ("I", _selectedRecord.IStart, _selectedRecord.IEnd);
+    }
+
+    private static string DisplayValue(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "--" : value;
+    }
+
+    private static string DisplayValue(decimal? value)
+    {
+        return value.HasValue ? value.Value.ToString("0.###") : "--";
+    }
+
+    private static string FormatNumber(double? value, bool includePlusMinus = false, double? tolerance = null)
+    {
+        if (!value.HasValue)
+        {
+            return "--";
+        }
+
+        if (!includePlusMinus || !tolerance.HasValue)
+        {
+            return value.Value.ToString("0.###");
+        }
+
+        return $"{value.Value:0.###} ± {tolerance.Value:0.###}";
+    }
+
+    private record SplineMeasurement
+    {
+        public string Position { get; init; } = string.Empty;
+        public decimal? NonHardened { get; set; }
+        public decimal? TopSpline { get; set; }
+        public decimal? BottomSpline { get; set; }
+    }
+
+    private record HardnessMeasurement(string Position)
+    {
+        public decimal? Value { get; set; }
+        public bool? Pass { get; set; }
+    }
+
+    private record AdjustmentTicketRowDefinition(string Area, Func<HeatTreatMasterRecord?, string> SpecificationFactory);
+
+    private class AdjustmentTicketRow
+    {
+        public AdjustmentTicketRow(string area)
+        {
+            Area = area;
+        }
+
+        public string Area { get; }
+        public string Specification { get; set; } = "--";
+        public string? Measured { get; set; }
+        public string? Status { get; set; }
+    }
+
+    private class HeatTreatFormState
+    {
+        public DateTime? Date { get; set; } = DateTime.Today;
+        public DateTime? Time { get; set; } = DateTime.Today.Add(DateTime.Now.TimeOfDay);
+        public string? Inspector { get; set; }
+        public string? Shift { get; set; }
+        public string? Line { get; set; }
+        public string? TypeOfTest { get; set; }
+        public string? PartNumber { get; set; }
+        public string? StampNumber { get; set; }
+        public string? PassStatus { get; set; }
+        public string? AdjustmentsRequired { get; set; }
+        public int? Q10 { get; set; }
+        public string? EddysonixJudgement { get; set; }
+        public string? Notes { get; set; }
+        public string? MarkingNotes { get; set; }
+    }
+}

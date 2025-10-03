@@ -130,3 +130,280 @@ a:focus {
     margin-top: auto; /* Push the footer to the bottom */
     padding: 10px 0; /* Optional: Add some padding to the footer */
 }
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.heat-treat-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.heat-treat-section {
+    border: 1px solid var(--rz-base-200);
+    box-shadow: none;
+}
+
+.heat-treat-card-header {
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--rz-base-200);
+    background-color: var(--rz-base-50);
+}
+
+.heat-treat-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.heat-treat-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.heat-treat-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.heat-treat-textarea {
+    margin-top: 1rem;
+}
+
+.heat-treat-summary-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background-color: var(--rz-base-50);
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--rz-text-secondary-color);
+}
+
+.summary-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.heat-treat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+}
+
+.heat-treat-table th,
+.heat-treat-table td {
+    border: 1px solid var(--rz-base-200);
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.heat-treat-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    gap: 0.75rem;
+}
+
+.heat-treat-spec {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.heat-treat-marking {
+    margin-top: 1rem;
+}
+
+.workbook-tabs {
+    background-color: #eef2ff;
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.workbook-tabs .rz-tabview-nav {
+    background: transparent;
+    border: none;
+    margin-bottom: 0.5rem;
+}
+
+.workbook-tabs .rz-tabview-nav li {
+    margin-right: 0.5rem;
+}
+
+.workbook-tabs .rz-tabview-nav-link {
+    background: #dbeafe;
+    border: 1px solid #c7d2fe;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    color: #1e3a8a;
+    font-weight: 600;
+    padding: 0.6rem 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.workbook-tabs .rz-tabview-nav-link.rz-state-active {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+.workbook-tabs .rz-tabview-panels {
+    background: #ffffff;
+    border: 1px solid #94a3b8;
+    border-radius: 0 8px 8px 8px;
+    padding: 2rem;
+}
+
+.excel-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.excel-header {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    color: #fff;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 6px 16px rgba(29, 78, 216, 0.18);
+}
+
+.excel-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.excel-subtitle {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.85;
+}
+
+.excel-metadata-grid {
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.excel-metadata-grid .excel-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #475569;
+    letter-spacing: 0.08em;
+}
+
+.excel-metadata-grid .excel-value {
+    display: block;
+    font-size: 1rem;
+}
+
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #f8fafc;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.excel-table th {
+    background-color: #e0e7ff;
+    color: #1e3a8a;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #cbd5f5;
+}
+
+.excel-table td {
+    border: 1px solid #d0d7ff;
+    padding: 0.65rem 0.85rem;
+    vertical-align: top;
+}
+
+.excel-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.excel-value {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.excel-note {
+    font-size: 0.85rem;
+    color: #475569;
+    font-style: italic;
+}
+
+.excel-split-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.excel-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #f1f5f9;
+    border: 1px solid #cbd5f5;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.excel-notes textarea,
+.excel-page .rz-textbox,
+.excel-page .rz-dropdown,
+.excel-page .rz-multiline-input {
+    width: 100%;
+}
+
+.excel-wide {
+    padding: 0.65rem 0.85rem;
+}
+
+.traveler-page .excel-table,
+.adjustment-page .excel-table,
+.es-page .excel-table {
+    background: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .workbook-tabs .rz-tabview-panels {
+        padding: 1.25rem;
+    }
+
+    .excel-header {
+        padding: 0.85rem 1rem;
+    }
+}

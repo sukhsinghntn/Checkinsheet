@@ -5,6 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <StaticWebAssetsEnableCompression>false</StaticWebAssetsEnableCompression>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
   <ItemGroup>
