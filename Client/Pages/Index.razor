@@ -30,43 +30,43 @@ else
                     <div class="heat-treat-grid">
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Date" />
-                            <RadzenDatePicker @bind-Value="_form.Date" Style="width: 100%;" />
+                            <RadzenDatePicker @bind-Value="_form.Date" TValue="DateTime?" Style="width: 100%;" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Time" />
-                            <RadzenTimePicker @bind-Value="_form.Time" Style="width: 100%;" />
+                            <RadzenTimePicker @bind-Value="_form.Time" TValue="DateTime?" Style="width: 100%;" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Inspector" />
-                            <RadzenTextBox @bind-Value="_form.Inspector" Style="width: 100%;" />
+                            <RadzenTextBox @bind-Value="_form.Inspector" TValue="string" Style="width: 100%;" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Shift" />
-                            <RadzenDropDown Data="_shiftOptions" @bind-Value="_form.Shift" Style="width: 100%;" AllowClear="true" Placeholder="Select shift" />
+                            <RadzenDropDown Data="_shiftOptions" @bind-Value="_form.Shift" TValue="string" Style="width: 100%;" AllowClear="true" Placeholder="Select shift" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Line" />
-                            <RadzenDropDown Data="_lineOptions" @bind-Value="_form.Line" Style="width: 100%;" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowClear="true" Placeholder="Select line" />
+                            <RadzenDropDown Data="_lineOptions" @bind-Value="_form.Line" TValue="string" Style="width: 100%;" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowClear="true" Placeholder="Select line" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Type of Test" />
-                            <RadzenDropDown Data="_testTypeOptions" @bind-Value="_form.TypeOfTest" Style="width: 100%;" AllowClear="true" Placeholder="Select type" />
+                            <RadzenDropDown Data="_testTypeOptions" @bind-Value="_form.TypeOfTest" TValue="string" Style="width: 100%;" AllowClear="true" Placeholder="Select type" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Part Number" />
-                            <RadzenDropDown Data="_records" TextProperty="PartNumber" ValueProperty="PartNumber" @bind-Value="_form.PartNumber" Change="OnPartNumberChanged" Style="width: 100%;" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Search part" />
+                            <RadzenDropDown Data="_records" TextProperty="PartNumber" ValueProperty="PartNumber" @bind-Value="_form.PartNumber" TValue="string" Change="OnPartNumberChanged" Style="width: 100%;" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" Placeholder="Search part" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Stamp Number" />
-                            <RadzenTextBox @bind-Value="_form.StampNumber" Style="width: 100%;" />
+                            <RadzenTextBox @bind-Value="_form.StampNumber" TValue="string" Style="width: 100%;" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Pass" />
-                            <RadzenDropDown Data="_passOptions" @bind-Value="_form.PassStatus" Style="width: 100%;" AllowClear="true" Placeholder="Select" />
+                            <RadzenDropDown Data="_passOptions" @bind-Value="_form.PassStatus" TValue="string" Style="width: 100%;" AllowClear="true" Placeholder="Select" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Adjustments Required" />
-                            <RadzenTextBox @bind-Value="_form.AdjustmentsRequired" Style="width: 100%;" />
+                            <RadzenTextBox @bind-Value="_form.AdjustmentsRequired" TValue="string" Style="width: 100%;" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="EddySonix Cycle (Q10)" />
@@ -74,12 +74,12 @@ else
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="EddySonix Judgement" />
-                            <RadzenTextBox @bind-Value="_form.EddysonixJudgement" Style="width: 100%;" />
+                            <RadzenTextBox @bind-Value="_form.EddysonixJudgement" TValue="string" Style="width: 100%;" />
                         </div>
                     </div>
                     <div class="heat-treat-textarea">
                         <RadzenLabel Text="Notes" />
-                        <RadzenTextArea @bind-Value="_form.Notes" Style="width: 100%;" Rows="3" />
+                        <RadzenTextArea @bind-Value="_form.Notes" TValue="string" Style="width: 100%;" Rows="3" />
                     </div>
                 </div>
             </ChildContent>
@@ -246,7 +246,7 @@ else
                                         <RadzenNumeric @bind-Value="point.Value" TValue="decimal?" Style="width: 100%;" Step="0.1" />
                                     </td>
                                     <td>
-                                        <RadzenCheckBox @bind-Value="point.Pass" TriState="true" />
+                                        <RadzenCheckBox @bind-Value="point.Pass" TValue="bool?" TriState="true" />
                                     </td>
                                 </tr>
                             }
@@ -349,7 +349,7 @@ else
                     </table>
                     <div class="heat-treat-marking">
                         <RadzenLabel Text="Additional Layout Notes" />
-                        <RadzenTextArea @bind-Value="_form.MarkingNotes" Style="width: 100%;" Rows="3" Placeholder="Record BJ/DOJ spline patterns, cut layouts, etc." />
+                        <RadzenTextArea @bind-Value="_form.MarkingNotes" TValue="string" Style="width: 100%;" Rows="3" Placeholder="Record BJ/DOJ spline patterns, cut layouts, etc." />
                     </div>
                 </div>
             </ChildContent>
