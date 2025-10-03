@@ -20,6 +20,7 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<IUserService, UserServiceProxy>();
 builder.Services.AddScoped<IEmailService, EmailServiceProxy>();
+builder.Services.AddScoped<IHeatTreatService, HeatTreatServiceProxy>();
 
 builder.Services.AddScoped<CookieHelper>();
 

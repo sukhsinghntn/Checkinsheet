@@ -24,4 +24,10 @@
     <ProjectReference Include="..\Client\NDAProcesses.Client.csproj" />
     <ProjectReference Include="..\NdaProcesses.Shared\NDAProcesses.Shared.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data/heat-treat-master-data.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -26,6 +26,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<CookieHelper>();
+builder.Services.AddSingleton<IHeatTreatService, HeatTreatService>();
 
 builder.Services.AddControllers();
 builder.Services.AddRadzenComponents();

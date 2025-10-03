@@ -130,3 +130,93 @@ a:focus {
     margin-top: auto; /* Push the footer to the bottom */
     padding: 10px 0; /* Optional: Add some padding to the footer */
 }
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.heat-treat-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.heat-treat-section {
+    border: 1px solid var(--rz-base-200);
+    box-shadow: none;
+}
+
+.heat-treat-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.heat-treat-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.heat-treat-textarea {
+    margin-top: 1rem;
+}
+
+.heat-treat-summary-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background-color: var(--rz-base-50);
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--rz-text-secondary-color);
+}
+
+.summary-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.heat-treat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+}
+
+.heat-treat-table th,
+.heat-treat-table td {
+    border: 1px solid var(--rz-base-200);
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.heat-treat-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    gap: 0.75rem;
+}
+
+.heat-treat-spec {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.heat-treat-marking {
+    margin-top: 1rem;
+}
