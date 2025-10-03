@@ -146,6 +146,21 @@ a:focus {
     box-shadow: none;
 }
 
+.heat-treat-card-header {
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--rz-base-200);
+    background-color: var(--rz-base-50);
+}
+
+.heat-treat-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
 .heat-treat-grid {
     display: grid;
     gap: 1rem;
