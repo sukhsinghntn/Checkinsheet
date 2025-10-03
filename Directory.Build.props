@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <StaticWebAssetsEnableCompression>false</StaticWebAssetsEnableCompression>
+    <StaticWebAssetsCompressOnBuild>false</StaticWebAssetsCompressOnBuild>
+    <StaticWebAssetsCompressOnPublish>false</StaticWebAssetsCompressOnPublish>
+  </PropertyGroup>
+</Project>
