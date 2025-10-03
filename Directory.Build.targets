@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <StaticWebAssetsEnableCompression>false</StaticWebAssetsEnableCompression>
+  </PropertyGroup>
+
+  <Target Name="DisableStaticWebAssetCompression" BeforeTargets="ApplyCompressionNegotiation">
+    <PropertyGroup>
+      <StaticWebAssetsEnableCompression>false</StaticWebAssetsEnableCompression>
+    </PropertyGroup>
+    <ItemGroup>
+      <StaticWebAssetCompressionCandidates Remove="@(StaticWebAssetCompressionCandidates)" />
+      <StaticWebAssetCompressionArtifacts Remove="@(StaticWebAssetCompressionArtifacts)" />
+    </ItemGroup>
+  </Target>
+</Project>

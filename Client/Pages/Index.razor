@@ -34,7 +34,7 @@ else
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Time" />
-                            <RadzenTimePicker @bind-Value="_form.Time" TValue="DateTime?" Style="width: 100%;" />
+                            <RadzenTimePicker Value="_form.Time" ValueChanged="@(value => _form.Time = value)" TValue="DateTime?" Style="width: 100%;" />
                         </div>
                         <div class="heat-treat-field">
                             <RadzenLabel Text="Inspector" />
